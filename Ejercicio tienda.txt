@@ -1,0 +1,155 @@
+ CREATE TABLE comprador (
+     cif_comprador VARCHAR(11),
+     nombre_social VARCHAR(30),
+     domicilio_social VARCHAR(30),
+     Localidad VARCHAR(30),
+     C_Postal VARCHAR(5),
+     telefono VARCHAR(9) NOT NULL,
+
+     CONSTRAINT cif_comprador_pk PRIMARY KEY (cif_comprador),
+     CONSTRAINT comprador_nombre_social_uk UNIQUE (nombre_Social)
+
+);
+
+CREATE TABLE articulo (
+     referencia_articulo VARCHAR(12),
+     descripcion_articulo VARCHAR(30),
+     precio_unidad NUMERIC (6,2),
+     iva NUMERIC (2) check (iva BETWEEN 5 AND 25),
+     existencias_actuales NUMERIC(5) DEFAULT 0,
+
+     CONSTRAINT articulo_pk PRIMARY KEY (referencia_articulo)
+);,
+
+create table factura (
+     factura_no NUMERIC(6),
+     fecha_factura DATE DEFAULT '2005-01-01',
+     cif_comprador VARCHAR(11),
+
+     CONSTRAINT factura_pk PRIMARY KEY (factura_no)
+);
+
+CREATE TABLE linea_factura (
+     factura_no NUMERIC(6),
+     Referencia_articulo VARCHAR(12),
+     Unidades NUMERIC(3),
+
+     CONSTRAINT linea_factura_pk PRIMARY KEY (referencia_articulo,factura_no),
+     CONSTRAINT linea_factura_fk FOREIGN KEY (factura_no) REFERENCES factura(factura_no)
+     ON DELETE CASCADE,
+     CONSTRAINT linea_articulo_fk FOREIGN KEY (referencia_articulo) REFERENCES articulo(referencia_articulo)
+);
+
+Ejercicio 1.2
+
+ALTER TABLE factura ADD cod_oficina NUMERIC(4);
+
+
+Ejercicio 1.3
+
+ALTER TABLE factura ADD CONSTRAINT factura_comprador_fk FOREIGN KEY (cif_comprador) REFERENCES comprador(cif_comprador);
+
+Ejercicio 1.4
+
+ALTER TABLE comprador RENAME COLUMN c_postal TO texto_codigo_postal;
+
+Ejercicio 1.5
+
+ALTER TABLE factura
+ADD CONSTRAINT cod_oficina_ck CHECK (cod_oficina BETWEEN 1 AND 1000);
+
+Ejercicio 3.1
+
+CREATE TABLE comprador_1(
+     cif_comprador VARCHAR(11),
+     nombre_social VARCHAR(30),
+     domicilio_social VARCHAR(30),
+     localidad VARCHAR(30),
+     c_postal VARCHAR(5),
+     teléfono VARCHAR(9)
+);
+
+CREATE TABLE articulo_1(
+     referencia_articulo VARCHAR (12),
+     descripcion_articulo VARCHAR(30),
+     precio_unidad DECIMAL(6,2),
+     iva NUMERIC(2),
+     existencias_actuales NUMERIC(5)
+);
+
+CREATE TABLE factura_1(
+     factura_no NUMERIC(6),
+     fecha_factura DATE,
+     cif_cliente VARCHAR(11)
+);
+
+CREATE TABLE linea_factura_1(
+     factura_no NUMERIC(6),
+     referencia_articulo VARCHAR(12),
+     unidades NUMERIC(3)
+);
+
+Ejercicio 3.2
+
+CREATE TABLE comprador_2(
+     cif_comprador VARCHAR(11) PRIMARY KEY,
+     nombre_social VARCHAR(30) UNIQUE,
+     domicilio_social VARCHAR(30),
+     localidad VARCHAR(30),
+     c_postal VARCHAR(5),
+     teléfono VARCHAR(9) NOT NULL
+);
+
+CREATE TABLE articulo_2(
+     referencia_articulo VARCHAR (12) PRIMARY KEY,
+     descripcion_articulo VARCHAR(30),
+     precio_unidad DECIMAL(6,2),
+     iva NUMERIC(2) CHECK (IVA BETWEEN 5 AND 25),
+     existencias_actuales NUMERIC(5) DEFAULT 0
+);
+
+CREATE TABLE factura_2(
+     factura_no NUMERIC(6) PRIMARY KEY,
+     fecha_factura DATE,
+     cif_ccomprador VARCHAR(11) REFERENCES comprador_2(cif_comprador)
+);
+
+
+Ejercicio 3.3
+
+CREATE TABLE comprador_3(
+     cif_comprador VARCHAR(11),
+     nombre_social VARCHAR(30),
+     domicilio_social VARCHAR(30),
+     localidad VARCHAR(30),
+     c_postal VARCHAR(5),
+     teléfono VARCHAR(9),
+     CONSTRAINT comprador_3_pk PRIMARY KEY (cif_comprador),
+     CONSTRAINT comprador_nombre_social_3_uk UNIQUE (nombre_social)
+);
+
+create table factura_3(
+     factura_no NUMERIC(6),
+     fecha_factura DATE,
+     cif_cliente VARCHAR(11),
+     CONSTRAINT factura_3_pk PRIMARY KEY (factura_no),
+     CONSTRAINT factura_3_fk FOREIGN KEY (cif_comprador) REFERENCES 	comprador_3(cif_comprador)
+);
+
+Ejercicio 3.4
+
+ALTER TABLE facturas_1
+ADD CONSTRAINT factura_no_1_pk PRIMARY KEY (factura_no);
+
+Ejercicio 3.5
+
+ALTER TABLE linea_factura_1
+ADD CONSTRAINT linea_factura_1_FK FOREIGN KEY (factura_no) REFERENCES factura_1(factura_no);
+
+Ejercicio 3.6
+
+ALTER TABLE articulo_1
+ADD CONSTRAINT articulo_descripcion_1_uk UNIQUE (descripcion_articulo);
+
+Ejercicio 3.7
+ALTER TABLE comprador_1 ALTER COLUMN telefono TYPE integer USING (trim(telefono)::integer);
