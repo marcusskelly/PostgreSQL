@@ -1,0 +1,150 @@
+do
+$$
+declare
+ v_emp record;
+begin
+ for v_emp in select modelo, precio
+ from terminal 
+ order by precio desc
+ limit 40
+ loop
+ raise notice 'Modelo: %, Precio: % EUR',
+ v_emp.modelo,
+ v_emp.precio;
+ end loop;
+end;
+$$
+Devuelve el modelo de cada terminal y su precio
+
+
+2. en la tabla linea, representad los "numero" que se hayan dado de baja
+create or replace function numero_baja ()
+ returns integer
+ language plpgsql
+ as
+ $$
+ declare
+ 
+    bajas integer;
+
+
+ begin
+ 
+
+    select count(*) 
+    into bajas
+    from linea
+    where fbaja is not null;
+
+    raise notice 'Se han dado de baja %', bajas;
+
+    return bajas;
+
+ end;
+ $$
+ 
+ 3. borrar una linea de telefono
+ create or replace procedure borrar_linea(
+    p_numero linea.numero%type
+)
+language plpgsql
+as
+$$
+declare
+   v_num_linea linea.numero%type;
+begin
+   -- primero comprobar si existe el empleado
+   select numero from linea
+   into v_num_linea
+   where numero = p_numero;
+   -- borrar enpleado
+   delete from linea
+   where numero = p_numero;
+   raise notice 'La linea ha sido eliminada correctamente';
+   -- capturar excepciones
+   exception
+      when no_data_found then 
+         raise notice 'la linea % no existe', p_numero;
+      when others then
+         raise exception 'Se ha producido en un error inesperado';
+end;
+$$
+
+
+4. Procedimiento que cambia de compañia a una linea de telefono
+(no funciona, mismo problema que el numero 3)
+create or replace procedure cambiar_compania(
+    p_num_linea linea.numero%type,
+   p_compania_linea linea.compania%type
+)
+language plpgsql
+as
+$$
+declare
+   v_num_linea linea%rowtype;
+begin
+   -- primero comprobar si existe la linea
+   select * from linea
+   into v_num_linea
+   where numero = p_num_linea;
+   -- actualizar compania
+   update linea
+   set compania = p_compania_linea
+   where numero = p_num_linea;
+   raise notice 'compania modificada correctamente';
+   -- capturar excepciones
+   exception
+      when no_data_found then 
+         raise notice 'la linea % no existe', p_num_linea;
+      when others then
+         raise exception 'Se ha producido en un error inesperado';
+end;
+$$
+
+
+5. Funcion que recibe un int como parametro, en este caso un numero de telefono, te devuelve el nombre de la compañia de este.
+create function get_nombre_compania3(numero int)
+returns character varying
+language plpgsql
+as
+$$
+declare
+ v_numeros character varying;
+begin
+ -- obtener número de empleados
+ select compania
+ into v_numeros
+ from linea;
+
+ return v_numeros;
+end;
+
+
+refactorizado 6
+create or replace procedure showBajas2(
+    p_num_bajas integer,
+    p_nombre_compania linea.compania%type
+)
+language plpgsql
+as
+$$
+declare
+    v_contador integer := 0;
+    v_bajas linea%rowtype;
+    v_compania linea.compania%type;
+    cur_bajas cursor for select * from linea where compania = p_nombre_compania;
+begin
+    open cur_bajas;
+    loop
+    fetch cur_bajas into v_bajas;
+    v_contador := v_contador + 1;
+    raise notice '%: Linea numero %, compañia: %', 
+        v_contador, v_bajas.numero, v_bajas.compania;
+    exit when v_contador = p_num_bajas or not;
+    end loop;
+    close cur_bajas;
+    exception
+        when others then
+            raise exception 'se ha producido un error inesperado';
+end
+$$
