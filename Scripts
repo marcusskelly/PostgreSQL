@@ -148,3 +148,62 @@ begin
             raise exception 'se ha producido un error inesperado';
 end
 $$
+
+
+8. Mostrar n terminales, siendo n un numero que pasamos por parámetro
+create or replace procedure mostar_terminal(
+    p_num_terminales integer
+)
+language plpgsql
+as 
+$$
+declare 
+v_terminal terminal%rowtype;
+v_contador integer := 0;
+cur_terminal cursor for 
+select * from terminal;
+begin
+    --abrimos el cursor
+    open cur_terminal;
+    loop
+    --obtener la terminal
+    fetch cur_terminal into v_terminal;
+    v_contador := v_contador + 1;
+    raise notice '% Terminal imei: %, modelo: %, marca: %, memoria: %, tarjeta: %, tipo: %, precio: %', v_contador, v_terminal.imei, v_terminal.modelo, v_terminal.modelo, v_terminal.marca, v_terminal.tarjeta, v_terminal.tipo, v_terminal.precio;
+    exit when v_contador = p_num_terminales or not found;
+end loop;
+close cur_terminal;
+exception
+    when others then 
+    raise exception 'Se ha producido un error inesperado';
+end;
+$$
+
+9. Nos da el nombre de todos los operadores y los números asignados a ellos
+(no funciona)
+create or replace procedure lista_companias ()
+language plpgsql
+as
+$$
+declare
+
+    cur_nombre cursor for 
+        select nombre from compania;
+
+    cur_linea cursor (v_compania linea.compania%type ) for
+        select numero from linea  where compania = v_compania;
+
+begin
+
+    for v_nombre in cur_nombre loop
+        raise notice 'Linea:  %', v_nombre;
+        raise notice '------------------------------------';
+            for v_linea in cur_linea(v_nombre) loop
+            raise notice 'Numero: %', v_linea;
+            end loop;
+    end loop;
+exception
+   when others then
+     raise exception 'Se ha producido un error inesperado';
+end;
+$$
